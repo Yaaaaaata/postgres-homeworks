@@ -15,14 +15,18 @@ WHERE discontinued = 1;
 
 -- 4. Удалить из products товары, снятые с продажи (discontinued = 1)
 -- Для 4-го пункта может потребоваться удаление ограничения, связанного с foreign_key. Подумайте, как это можно решить, чтобы связь с таблицей order_details все же осталась.
--- Удаление ограничения foreign key
-ALTER TABLE products
-DROP FOREIGN KEY fk_product_id;
+UPDATE order_details
+SET product_id = (
+    SELECT product_id
+    FROM products
+    WHERE discontinued = 0
+    LIMIT 1
+)
+WHERE product_id IN (
+    SELECT product_id
+    FROM products
+    WHERE discontinued = 1
+);
 
--- Выполнение операции DELETE
 DELETE FROM products
 WHERE discontinued = 1;
-
--- Восстановление ограничения foreign key
-ALTER TABLE products
-ADD CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES order_details (product_id);
